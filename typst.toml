@@ -1,0 +1,7 @@
+[package]
+name = "chantx"
+version = "0.1.0"
+entrypoint = "lib.typ"
+authors = ["John Millsap"]
+license = "GPL-3.0-only"
+description = "Package for typesetting Gregorian chant notation"
