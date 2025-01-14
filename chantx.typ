@@ -53,19 +53,18 @@
             } else if notes.at(index).at(1) == "d" {
               place(top, dx: offset, dy: val, punctum)
               place(top, dx: (offset + 6pt), dy: val, dot)
-              
             }
           }
-        }
+      }
     }
   ]
 }
 
-// no letter: punctum
-// h: hollow punctum
+// no letter: punctum DONE
+// h: hollow punctum DONE
 // p: podatus (ascending pair)
 // c: clivis (descending pair)
-// d: dot (same level for odd notes (between lines), top right for even notes (on lines))
+// d: dot DONE
 // t: torculus (three note group not solely ascending or descending)
 // o: porrectus (the swoopy one)
 // a: scandicus (ascending triplet)
