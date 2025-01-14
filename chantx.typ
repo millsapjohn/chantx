@@ -1,7 +1,8 @@
 #let c_clef = image("./resources/c_clef.svg")
 #let f_clef = image("./resources/f_clef.svg")
 #let punctum = image("./resources/punctum.svg")
-#let punctum_hollow = image("./resources/punctum_hollow.svg")
+#let punctum_hollow = image("./resources/punctum_hollow.svg", width: 1%)
+#let dot = image("./resources/dot.svg")
 
 #let chant(root, clef, text) = {
   let val = (7 - root) * 5pt + 2pt
@@ -34,11 +35,28 @@
         }
       }
     }
-    #let new_notes = notes.enumerate()
-    #for note in new_notes {
-      let offset = (note.at(0) * 10pt) + 40pt
-      let val = ((9 - int(note.at(1))) * 5pt) - 33pt
-      place(top, dx: offset, dy: val, punctum)
+    #notes.at(1).len()
+    #notes.at(1).slice(0,1)
+    #type(notes.at(1))
+    #let indices = array.range(notes.len())
+    #for index in indices {
+      if notes.at(index).len() == 1 {
+        let offset = (index * 20pt) + 40pt
+        let val = ((7 - int(notes.at(index))) * 5pt) - 33pt
+        place(top, dx: offset, dy: val, punctum)
+      } else {
+          if notes.at(index).len() == 2 {
+            let offset = (index * 20pt) + 40pt
+            let val = ((7 - int(notes.at(index).slice(0,1))) * 5pt) - 33pt
+            if notes.at(index).at(1) == "h" {
+              place(top, dx: offset, dy: val, punctum_hollow)
+            } else if notes.at(index).at(1) == "d" {
+              place(top, dx: offset, dy: val, punctum)
+              place(top, dx: (offset + 6pt), dy: val, dot)
+              
+            }
+          }
+        }
     }
   ]
 }
