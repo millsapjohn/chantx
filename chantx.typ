@@ -60,24 +60,29 @@
   ]
 }
 
-// no letter: punctum DONE
-// h: hollow punctum DONE
-// p: podatus (ascending pair)
-// c: clivis (descending pair)
-// d: dot DONE
-// t: torculus (three note group not solely ascending or descending)
-// o: porrectus (the swoopy one)
-// a: scandicus (ascending triplet)
-// l: salicus (ascending triplet with second note ictic)
-// q: quilisma (ascending triplet with jagged second note)
-// e: episema (horizontal line above neume) (only goes above first note in groups)
-// v: right virga (vertical line attached to neume)
-// V: left virga
-// |: quarter bar
-// ||: half bar
-// |||: full bar
-// ||||: double bar
-// ;;: force line break
-// groups of numbers without letters following will be grouped with a tie
+// no letter: punctum
+// h: hollow punctum
+// p: podatus (ascending pair) TODO
+// c: clivis (descending pair) TODO
+// d: dot
+// t: torculus (three note group not solely ascending or descending) TODO
+// o: porrectus (the swoopy one) TODO
+// a: scandicus (ascending triplet) TODO
+// l: salicus (ascending triplet with second note ictic) TODO
+// q: quilisma (ascending triplet with jagged second note) TODO
+// e: episema (horizontal line above neume) (only goes above first note in groups) TODO
+// v: right virga (vertical line attached to neume) TODO
+// V: left virga TODO
+// |: quarter bar TODO
+// ||: half bar TODO
+// |||: full bar TODO
+// ||||: double bar TODO
+// ;;: force line break TODO
+// groups of numbers without letters following will be grouped with a tie TODO
 
-// gcnt (Gregorian Chant Notation, Typst) file extension
+// gcnt (Gregorian Chant Notation, Typst) file extension - formatted as a TOML file
+// TODO: finish logic for all neumes
+// TODO: find svg for tie
+// TODO: figure out word/neume alignment logic
+// TODO: add file opening logic
+// TODO: test on varying fonts/sizes to make sure layouts are scaling right
