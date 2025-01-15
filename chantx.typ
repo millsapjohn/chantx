@@ -44,30 +44,33 @@
         let offset = (index * 20pt) + 40pt
         let val = ((7 - int(notes.at(index))) * 5pt) - 33pt
         place(top, dx: offset, dy: val, punctum)
-      } else {
-          if notes.at(index).len() == 2 {
-            let offset = (index * 20pt) + 40pt
-            let val = ((7 - int(notes.at(index).slice(0,1))) * 5pt) - 33pt
-            if notes.at(index).at(1) == "h" {
-              place(top, dx: offset, dy: val, punctum_hollow)
-            } else if notes.at(index).at(1) == "d" {
-              place(top, dx: offset, dy: val, punctum)
-              place(top, dx: (offset + 6pt), dy: val, dot)
-            }
+      } else if notes.at(index).len() == 2 {
+          let offset = (index * 20pt) + 40pt
+          let val = ((7 - int(notes.at(index).slice(0,1))) * 5pt) - 33pt
+          if notes.at(index).at(1) == "h" {
+            place(top, dx: offset, dy: val, punctum_hollow)
+          } else if notes.at(index).at(1) == "d" {
+            place(top, dx: offset, dy: val, punctum)
+            place(top, dx: (offset + 6pt), dy: val, dot)
           }
-      }
+        }
     }
   ]
 }
 
 // no letter: punctum
 // h: hollow punctum
+// r: rhombus (diamond) TODO
 // p: podatus (ascending pair) TODO
 // c: clivis (descending pair) TODO
 // d: dot
-// t: torculus (three note group not solely ascending or descending) TODO
+// ': accentus TODO
+// (): parenthesis brace over notes TODO
+// {}: curly brace over notes TODO
+// {{}}: curly brace with accentus over notes TODO
+// t: torculus (triplet, ascent followed by descent) TODO
 // o: porrectus (the swoopy one) TODO
-// a: scandicus (ascending triplet) TODO
+// s: scandicus (ascending triplet) TODO
 // l: salicus (ascending triplet with second note ictic) TODO
 // q: quilisma (ascending triplet with jagged second note) TODO
 // e: episema (horizontal line above neume) (only goes above first note in groups) TODO
