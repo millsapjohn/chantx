@@ -60,6 +60,14 @@ While not absolutely required, it is recommended for the sake of readability (an
             a(5) read(8)able(7) \
             for(6)mat(7) \
             """
+Line-ending backslashes are essentially "ignored" by the TOML parser, so be sure to include the necessary spaces before them. For example,
+
+    Text = """
+      some text in\
+      a readable\
+      format
+      """
+Will be rendered as "some text ina readableformat". As mentioned above, whitespaces are important to the GCNT parsing engine for determining where words begin and end (and where to automatically apply hyphenation), so be careful.
 
 ## GCNT Format
 
@@ -80,6 +88,8 @@ The basic neume types are listed below:
 - no marks: basic/filled punctum
 - h: hollow punctum
 - r: rhombus (diamond-shaped neume)
+- f: flat
+- n: natural
 
 ### Grouping Marks
 
@@ -97,11 +107,15 @@ Grouping marks define how chantx will join multiple neumes together. The groupin
     - l: salicus (ascending three-note group, second neume is ictic)
     - q: quilisma (ascending triplet, meaning uncertain)
 
+Within the "unjoined" grouping types, any neume or decorative mark (see below) is allowed. Within the "joined" grouping types, only filled neumes are allowed, and only "d" (dot), "\'" (accentus), and "e"/"E" (episema) decorative marks are allowed. In a porrectus, only the last neume can have a dot decoration.
+
 Note that the above brackets are still contained within the parentheses for the annotation. For example, three neumes unjoined with a "parenthesis" tie above the staff might be annotated thus: `Al((757))`.
 
 In situations where multiple neumes/neume groups apply to the same syllable, they should be contained within separate parentheses. For example, to annotate a podatus followed by a torculus on the same syllable, you might write `Al(p[23])(t[343])`.
 
 Note that the chantx parsing engine will require that the number of notes associated with a grouping mark (or lack thereof) must match the rules for that mark. An annotation such as `Al(565)` will not compile, as it contains multiple notes; similarly, `Al(t[5656])` will not compile because four notes are included in a three-note grouping (a torculus).
+
+Finally, note that for the "joined" grouping types, all neumes must meet the rules regarding ascent and descent for that group type. For example, an annotation of `Al(p[65])` will generate an error, because a podatus is defined as an ascending group - the second note must be higher than the first.
 
 ### Division Markings
 
@@ -121,22 +135,24 @@ There are several other marks available in the notation:
 - \': accentus (placed above staff)
 - v: right virga (vertical line attached to right edge of neume)
 - V: left virga (vertical line attached to left edge of neume)
-- e: episema (horizontal line above neume)
+- e: horizontal episema (line)
+- E: vertical episema (line)
 
-These "decorative" marks always follow directly after the neume they affect. For example, adding a right virga to the first neume in a tied group might be indicated like so: `Al([5v65])`.
+These "decorative" marks always follow directly after the neume they affect. For example, adding a right virga to the first neume in a tied group might be indicated like so: `Al((5v65))`.
 
-NOTE: at this time, chantx is not "opinionated" about assigning common marks to certain neumes. For example, in many chants, it is common to have a left virga attached to the first neume in a clivis. At this time, chantx does not add such virgae by default.
-
-### General Approach to Conventions
-
-Building on the above, chantx at this time is not strongly opinionated about most conventions, and will let you do things that are "wrong". For example, adding a dot to a rhombus is unheard-of in plainchant, but chantx will happily let you do so if you desire. The only exceptions at this time are for things that are hard to render. For example, you cannot put a rhombus in a torculus, because there is no good way to render such an annotation.
+NOTE: at this time, chantx is not "opinionated" about assigning common marks to certain neumes. For example, in many chants, it is common to have a left virga attached to the first neume in a clivis. At this time, chantx does not add such virgae by default. Similarly, chantx will not put a double bar at the end of a chant unless instructed to do so with a `(;;)` annotation. The only "automatic" formatting chantx will do to your chant is hyphenating between syllables, and adding line breaks where necessary.
 
 ### Future Improvements
 
-Chantx 1.0 will be somewhat limited in scope, focusing on writing the GCNT notation parsing engine and ensuring neumes render correctly on a page. Future versions of the software will (hopefully) include many additional features, such as:
+Chantx 1.0 hopes to be feature-complete enough to render decent-looking chants that use most of the most common neumes and group types. However, in order to shorten development time, the initial version will be focusing on writing the GCNT notation parsing engine and ensuring neumes render correctly on a page, rather than putting together an exhaustive list of supported neumes and groups. Future versions of the software will (hopefully) include many additional features, such as:
 
 - rendering the custos at the end of lines
 - rendering decorative initial letters at the beginning of chants
+- multiple dots on a neume
+- rendering the various liquescent groups
+- control over where quarter and half bars are placed on the staff
 - support for showing/styling text annotations on the chants, such as Mode, usage, etc.
 
-Given that writing the parser is the most labor-intensive part of the work, future versions after 1.0 should be relatively quick in coming.
+It is to be hoped that any changes to the GCNT notation format will be backwards-compatible; i.e., any chant written with the "1.0" version of the notation system will render identically with any future versions. 
+
+Feel free to open a feature request or discussion to ask for a neume or group you need to be added to the annotation system; however, do be aware that any such requests received prior to the release of version 1.0 will not be addressed until 1.0 is out.
