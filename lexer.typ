@@ -175,6 +175,10 @@
         let type = "punctum_hollow"
       } else if anno.at(char_index) == "r" {
         let type = "rhombus"
+      } else if anno.at(char_index) == "f" {
+        let type = "flat"
+      } else if anno.at(char_index) == "n" {
+        let type = "natural"
       } else if anno.at(char_index) == "d" {
         mods.push("dot")
       } else if anno.at(char_index) == "e" {
@@ -193,7 +197,7 @@
     }
     char_index += 1
   }
-  let proc_anno = ("neume", val, mods)
+  let proc_anno = (type, val, mods)
   return proc_anno
 }
 
@@ -226,60 +230,179 @@
 }
 
 #let group_parse(anno) = {
+  let raw_neumes = ()
+  let char_index = 1
+  while char_index < anno.len() {
+    let neume_break = false
+    let raw_neume = ""
+    let val = "f"
+    while neume_break == false {
+      if anno.at(char_index) == "{" {
+        char_index += 1
+        continue
+      } else if anno.at(char_index) in digits {
+        if val = "f" {
+          let val = anno.at(char_index)
+          let raw_neume = raw_neume + anno.at(char_index)
+          char_index += 1
+        } else {
+          let neume_break = true
+        }
+      } else if anno.at(char_index) in deco_chars {
+        let raw_neume = raw_neume + anno.at(char_index)
+        char_index += 1
+      } else if anno.at(char_index) in neume_chars {
+        let raw_neume = raw_neume + anno.at(char_index)
+        char_index += 1
+      } else if anno.at(char_index) == "}" {
+        let neume_break = true
+      } else {
+        panic("incorrect group notation", anno)
+      }
+    }
+    raw_neumes.push(raw_neume)
+  }
+  let proc_neumes = ()
+  for raw_neume raw_neumes {
+    let proc_neume = neum_parse(raw_neume)
+    proc_neumes.push(proc_neume)
+  }
   if anno.at(0) == "p" {
     let type = "podatus"
-    let proc_group = pod_parse(anno)
+    if proc_neumes.len() != 2 {
+      panic("incorrect number of neumes in podatus", anno)
+    }
+    let pass = group_mods(proc_neumes)
+    let pass = ascend_check(proc_neumes)
   } else if anno.at(0) == "c" {
     let type = "clivis"
-    let proc_group = cliv_parse(anno)
+    if proc_neumes.len() != 2 {
+      panic("incorrect number of neumes in clivis", anno)
+    }
+    let pass = group_mods(proc_neumes)
+    let pass = descend_check(proc_neumes)
   } else if anno.at(0) == "t" {
     let type = "torculus"
-    let proc_group = torc_parse(anno)
+    if proc_neumes.len() != 3 {
+      panic("incorrect number of neumes in torculus", anno)
+    }
+    let pass = group_mods(proc_neumes)
+    let pass = torc_check(proc_neumes)
   } else if anno.at(0) == "o" {
     let type = "porrectus"
-    let proc_group = por_parse(anno)
+    if proc_neumes.len() != 3 {
+      panic("incorrect number of neumes in porrectus", anno)
+    }
+    let pass = group_mods(proc_neumes)
+    let pass = porr_check(proc_neumes)
   } else if anno.at(0) == "s" {
     let type = "scandicus"
-    let proc_group = scan_parse(anno)
+    if proc_neumes.len() != 3 {
+      panic("incorrect number of neumes in scandicus", anno)
+    }
+    let pass = group_mods(proc_neumes)
+    let pass = ascend_check(proc_neumes)
   } else if anno.at(0) == "l" {
     let type = "salicus"
-    let proc_group = sal_parse(anno)
+    if proc_neumes.len() != 3 {
+      panic("incorrect number of neumes in salicus", anno)
+    }
+    let pass = group_mods(proc_neumes)
+    let pass = ascend_check(proc_neumes)
   } else if anno.at(0) == "q" {
     let type = "quilisma"
-    let proc_group = quil_parse(anno)
+    if proc_neumes.len() != 3 {
+      panic("incorrect number of neumes in quilisma", anno)
+    }
+    let pass = group_mods(proc_neumes)
+    let pass = ascend_check(proc_neumes)
   } else if anno.at(0) == "(" {
     let type = "tie_round"
-    let proc_group = tie_round_parse(anno)
   } else if anno.at(0) == "{" {
     if anno.at(1) == "{" {
       let type = "tie_bracket_punctus"
-      let proc_group = tie_brac_punc_parse(anno)
     } else {
       let type = "tie_bracket"
-      let proc_group = tie_brac_parse(anno)
     }
   } else {
     panic("incorrect group syntax", anno)
   }
+  let proc_group = (type, proc_neumes)
   return proc_group
 }
 
-#let pod_parse(anno) = {
-  let char_index = 0
-  let raw_neumes = ()
-  while char_index < anno.len() {
-    let val = "f"
-    let neume_break = false
-    while neume_break == false {
-      if char_index < 2 {
-        continue
-      } else if val == "f" {
-        let val = int(anno.at(char_index))
-      } else if char == "d" {
-        continue
-      }
+#let group_mods(neumes) = {
+  let pass = true
+  for neume in neumes {
+    if neume.at(0) != "punctum" {
+      panic("only puncta allowed in joined groups")
+    }
+    let mods = neume.at(1)
+    if "virga_right" in mods {
+      panic("virgae not allowed in joined groups")
+    } else if "virga_left" in mods {
+      panic("virgae not allowed in joined groups")
+    } else {
+      continue
     }
   }
 }
 
-//TODO all the group parsers
+#let ascend_check(neumes) = {
+  let pass = true
+  let neume_index = 0
+  while neume_index < neumes.len() {
+    if neumes.at(neume_index).at(1) < neumes.at(neume_index + 1).at(1) {
+      neume_index += 1
+    } else {
+      panic("descending neumes in ascending group type")
+    }
+  }
+  return pass
+}
+
+#let descend_check(neumes) = {
+  let pass = true
+  let neume_index = 0
+  while neume_index < neumes.len() {
+    if neumes.at(neume_index).at(1) < neumes.at(neume_index + 1).at(1) {
+      neume_index += 1
+    } else {
+      panic("ascending neumes in descending neume group")
+    }
+  }
+  return pass
+}
+
+#let torc_check(neumes) = {
+  let pass = true
+  if neumes.at(0).at(1) < neumes.at(1).at(1) {
+    if neumes.at(1).at(1) > neumes.at(2).at(1) {
+      continue
+    } else {
+      panic("incorrect sequence in torculus")
+    }
+  } else {
+    panic("incorrect sequence in torculus")
+  }
+  return pass
+}
+
+#let porr_check(neumes) = {
+  let pass = true
+  if neumes.at(0).at(1) > neumes.at(1).at(1) {
+    if neumes.at(1).at(1) < neumes.at(2).at(1) {
+      continue
+    } else {
+      panic("incorrect sequence in porrectus")
+    }
+  } else {
+    panic("incorrect sequence in porrectue")
+  }
+  if "dot" in neumes.at(0).at(2) {
+    panic("dot not allowed on first neume of porrectus")
+  } else if "dot" in neumes.at(1).at(2) {
+    panic("dot not allowen on first neume of porrectus")
+  }
+  return pass
+}
