@@ -19,7 +19,7 @@
   ]
 }
 
-// TODO: find svg for tie
+// TODO: find remaining svgs
 // TODO: figure out word/neume alignment logic
 // TODO: add file opening logic
 // TODO: test on varying fonts/sizes to make sure layouts are scaling right
