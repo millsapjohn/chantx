@@ -69,7 +69,7 @@ Within the "Text" field is the text of the chant. This is arranged in a way that
 
 Note that there is not a space between the text and parentheses; this is important, as the parser will treat anything separated by a whitespace character as a separate word, which affects automated hyphenation.
 
-The entire text of the chant must be contained within a single string. As shown above, the easiest way to keep your score clean is to use a multiline string with line-ending backslashes. When arranged this way, newline characters within the score have no effect. A newline within the engraving can be forced with a pair of semicolons `;;`. 
+The entire text of the chant must be contained within a single string. As shown above, the easiest way to keep your score clean is to use a multiline string with line-ending backslashes. When arranged this way, newline characters within the score have no effect. A newline within the engraving can be forced with a pair of semicolons, for example `Si(7v)on(t[676])(;;)`. 
 
 ### Basic Neumes
 
@@ -99,7 +99,7 @@ Grouping marks define how chantx will join multiple neumes together. The groupin
 
 Note that the above brackets are still contained within the parentheses for the annotation. For example, three neumes unjoined with a "parenthesis" tie above the staff might be annotated thus: `Al((757))`.
 
-In situations where multiple neumes/neume groups apply to the same syllable, they should be contained within the same pair of parentheses. For example, to annotate a podatus followed by a torculus on the same syllable, you might write `Al(p[23]t[343])`.
+In situations where multiple neumes/neume groups apply to the same syllable, they should be contained within separate parentheses. For example, to annotate a podatus followed by a torculus on the same syllable, you might write `Al(p[23])(t[343])`.
 
 Note that the chantx parsing engine will require that the number of notes associated with a grouping mark (or lack thereof) must match the rules for that mark. An annotation such as `Al(565)` will not compile, as it contains multiple notes; similarly, `Al(t[5656])` will not compile because four notes are included in a three-note grouping (a torculus).
 
@@ -111,7 +111,7 @@ Note that the chantx parsing engine will require that the number of notes associ
 - ||||: double bar
 - ;;: force line break
 
-Division markings can be contained in parentheses with other markings, or enclosed within their own parentheses. For example, to add a quarter bar, you might indicate it like so: `Al(7)le(6)lu(7)ia;(6)(|)`.
+Division markings must be enclosed within their own parentheses. For example, to add a quarter bar, you might indicate it like so: `Al(7)le(6)lu(7)ia;(6)(|)`.
 
 ### Other Marks
 
