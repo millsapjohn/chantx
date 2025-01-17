@@ -105,7 +105,7 @@ Grouping marks define how chantx will join multiple neumes together. The groupin
     - o: porrectus (three-note group consisting of a descent followed by an ascent)
     - s: scandicus (ascending three-note group, first neume is ictic)
     - l: salicus (ascending three-note group, second neume is ictic)
-    - q: quilisma (ascending triplet, meaning uncertain)
+    - q: quilisma (ascending three-note group, meaning uncertain/debated)
 
 Within the "unjoined" grouping types, any neume or decorative mark (see below) is allowed. Within the "joined" grouping types, only filled neumes are allowed, and only "d" (dot), "\'" (accentus), and "e"/"E" (episema) decorative marks are allowed. In a porrectus, only the last neume can have a dot decoration.
 
