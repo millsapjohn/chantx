@@ -5,228 +5,81 @@
 #let group_chars = "pc({toslq"
 #let rhythm_chars = "|;"
 
-#let chant_parse(source) = {
-  let source_len = source.len()
-  if source.trim() == ""{
-    panic("Text field is empty")
-  }
-  let raw_words = ()
-  let proc_words = ()
-  let no_text = false
-  let word_break = false
-  let chant_break = false
-  let char_index = 0
-  if source.at(0) == "(" {
-    let no_text = true
-  }
 
-  while chant_break == false {
-    let word = ""
-    while word_break == false {
-      let word = word + source.at(char_index)
-      if char_index == source.len() {
-        let chant_break = true
-        let word_break = true
-      } else if source.at(char_index) == " " {
-        let word_break = true
-      }
-    }
-    words.push(word)
-  }
-
-  for word in words {
-    let proc_word = word_parse(no_text, word)
-    proc_words.push(proc_word)
-  }
-}
-
-#let word_parse(no_text, word) = {
-  if no_text = false {
-    if word.at(0) == "(" {
-      panic("no text with annotation", word)
-    }
-  }
-  // checking that parentheses match
-  let open_count = 0
-  let close_count = 0
-  for char in word {
-    if char == "(" {
-      open_count += 1
-    } else if char = ")" {
-      close_count += 1
-    }
-  }
-  if open_count != close_count {
-    panic("mismatched parentheses", word)
-  } else if open_count == 0 {
-    panic("no annotation", word)
-  }
-  let sylls = ()
-  while char_index < word.len() {
-    let syll = ""
-    let open_count = 0
-    let close_count = 0
-    let syll_break = false
-    while syll_break == false {
-      if word.at(char_index) == "(" {
-        open_count += 1
-        if open_count > 1 {
-          let syll = syll + word.at(char_index)
-        }
-        char_index += 1
-      } else if word.at(char_index) == ")" {
-        close_count += 1
-        if open_count > 1 {
-          if (close_count + 1) == open_count {
-            let syll = syll + word.at(char_index)
-            char_index += 1
-          } else if open_count == close_count {
-            if word.at(char_index + 1) in text_chars {
-              char_index += 1
-              let syll_break = true
-            }
-          }
-        }
-      } else {
-        char_index += 1
-        let syll = syll + word.at(char_index)
-      }
-    }
-    sylls.push(syll)
-  }
-  let proc_sylls = ()
-  for syll in sylls {
-    let proc_syll = syll_parse(syll)
-    proc_sylls.push(proc_syll)
-  }
-  return proc_sylls
-}
-
-#let syll_parse(syll) = {
-  let text = ""
-  let char_index = 0
-  let text_break = false
-  while text_break = false {
-    let char = syll.at(char_index)
-    if char in text_chars {
-      let text = text + char
-      char_index += 1
+#let porr_check(neumes) = {
+  let pass = true
+  if neumes.at(0).at(1) > neumes.at(1).at(1) {
+    if neumes.at(1).at(1) < neumes.at(2).at(1) {
+      continue
     } else {
-      let text_break = true
-      char_index += 1
-    }
-  }
-  let annos = ()
-  while char_index < syll.len() {
-    let anno_break = false
-    let anno = ""
-    while anno_break == false {
-      if syll.at(char_index) == "(" {
-        if syll.at(char_index + 1) == "(" {
-          char_index += 1
-          continue
-        } else {
-          let anno = anno + syll.at(char_index)
-          char_index += 1
-        }
-      } else if syll.at(char_index) == ")" {
-        if syll.at(char_index - 1) == ")" {
-          char_index += 1
-          let anno_break = true
-          annos.push(anno)
-        }
-      } else {
-        let anno = anno + syll.at(char_index)
-        char_index += 1
-      }
-    }
-  }
-  let proc_syll = (text,)
-  for anno in annos {
-    let proc_anno = anno_parse(anno)
-    proc_syll.push(proc_anno)
-  }
-  return proc_syll
-}
-
-#let anno_parse(anno) = {
-  if anno.at(0) in digits {
-    let proc_anno = neume_parse(anno)
-  } else if anno.at(0) in group_chars {
-    let proc_anno = group_parse(anno)
-  } else if anno.at(0) in rhythm_chars {
-    let proc_anno = rhythm_parse(anno)
-  } else {
-    panic("syntax error: leading character incorrect", anno)
-  }
-  return proc_anno
-}
-
-#let neume_parse(anno) = {
-  let char_index = 0
-  let type = "punctum"
-  let mods = ()
-  while char_index < anno.len() {
-    if char_index == 0 {
-      let val = int(anno.at(char_index))
-      char_index += 1
-    } else {
-      if anno.at(char_index) == "h" {
-        let type = "punctum_hollow"
-      } else if anno.at(char_index) == "r" {
-        let type = "rhombus"
-      } else if anno.at(char_index) == "f" {
-        let type = "flat"
-      } else if anno.at(char_index) == "n" {
-        let type = "natural"
-      } else if anno.at(char_index) == "d" {
-        mods.push("dot")
-      } else if anno.at(char_index) == "e" {
-        mods.push("episema_horiz")
-      } else if anno.at(char_index) == "E" {
-        mods.push("episema_vert")
-      } else if anno.at(char_index) == "v" {
-        mods.push("virga_right")
-      } else if anno.at(char_index) == "V" {
-        mods.push("virga_left")
-      } else if anno.at(char_index) == "\'" {
-        mods.push("accentus")
-      } else {
-        panic("unknown character in neume", anno)
-      }
-    }
-    char_index += 1
-  }
-  let proc_anno = (type, val, mods)
-  return proc_anno
-}
-
-#let rhythm_parse(anno) = {
-  if anno.at(0) == ";" {
-    if anno.at(1) == ";" {
-      let type = "line break"
-    } else {
-      panic("incorrect syntax - single semicolon", anno)
+      panic("incorrect sequence in porrectus")
     }
   } else {
-    if anno.len() > 4 {
-      panic("incorrect rhythm marking", anno)
+    panic("incorrect sequence in porrectue")
+  }
+  if "dot" in neumes.at(0).at(2) {
+    panic("dot not allowed on first neume of porrectus")
+  } else if "dot" in neumes.at(1).at(2) {
+    panic("dot not allowen on first neume of porrectus")
+  }
+  return pass
+}
+
+#let torc_check(neumes) = {
+  let pass = true
+  if neumes.at(0).at(1) < neumes.at(1).at(1) {
+    if neumes.at(1).at(1) > neumes.at(2).at(1) {
+      continue
     } else {
-      if anno == "|" {
-        let type = "bar_quarter"
-      } else if anno == "||" {
-        let type = "bar_half"
-      } else if anno == "|||" {
-        let type = "bar_full"
-      } else if anno == "||||" {
-        let type = "bar_double"
-      } else {
-        panic("incorrect rhythm marking", anno)
-      }
+      panic("incorrect sequence in torculus")
+    }
+  } else {
+    panic("incorrect sequence in torculus")
+  }
+  return pass
+}
+
+#let descend_check(neumes) = {
+  let pass = true
+  let neume_index = 0
+  while neume_index < neumes.len() {
+    if neumes.at(neume_index).at(1) < neumes.at(neume_index + 1).at(1) {
+      neume_index += 1
+    } else {
+      panic("ascending neumes in descending neume group")
     }
   }
-  let proc_anno = ("rhythm", type)
-  return proc_anno
+  return pass
+}
+
+#let ascend_check(neumes) = {
+  let pass = true
+  let neume_index = 0
+  while neume_index < neumes.len() {
+    if neumes.at(neume_index).at(1) < neumes.at(neume_index + 1).at(1) {
+      neume_index += 1
+    } else {
+      panic("descending neumes in ascending group type")
+    }
+  }
+  return pass
+}
+
+#let group_mods(neumes) = {
+  let pass = true
+  for neume in neumes {
+    if neume.at(0) != "punctum" {
+      panic("only puncta allowed in joined groups")
+    }
+    let mods = neume.at(1)
+    if "virga_right" in mods {
+      panic("virgae not allowed in joined groups")
+    } else if "virga_left" in mods {
+      panic("virgae not allowed in joined groups")
+    } else {
+      continue
+    }
+  }
 }
 
 #let group_parse(anno) = {
@@ -263,7 +116,7 @@
     raw_neumes.push(raw_neume)
   }
   let proc_neumes = ()
-  for raw_neume raw_neumes {
+  for raw_neume in raw_neumes {
     let proc_neume = neum_parse(raw_neume)
     proc_neumes.push(proc_neume)
   }
@@ -331,78 +184,216 @@
   return proc_group
 }
 
-#let group_mods(neumes) = {
-  let pass = true
-  for neume in neumes {
-    if neume.at(0) != "punctum" {
-      panic("only puncta allowed in joined groups")
-    }
-    let mods = neume.at(1)
-    if "virga_right" in mods {
-      panic("virgae not allowed in joined groups")
-    } else if "virga_left" in mods {
-      panic("virgae not allowed in joined groups")
+#let rhythm_parse(anno) = {
+  if anno.at(0) == ";" {
+    if anno.at(1) == ";" {
+      let type = "line break"
     } else {
-      continue
-    }
-  }
-}
-
-#let ascend_check(neumes) = {
-  let pass = true
-  let neume_index = 0
-  while neume_index < neumes.len() {
-    if neumes.at(neume_index).at(1) < neumes.at(neume_index + 1).at(1) {
-      neume_index += 1
-    } else {
-      panic("descending neumes in ascending group type")
-    }
-  }
-  return pass
-}
-
-#let descend_check(neumes) = {
-  let pass = true
-  let neume_index = 0
-  while neume_index < neumes.len() {
-    if neumes.at(neume_index).at(1) < neumes.at(neume_index + 1).at(1) {
-      neume_index += 1
-    } else {
-      panic("ascending neumes in descending neume group")
-    }
-  }
-  return pass
-}
-
-#let torc_check(neumes) = {
-  let pass = true
-  if neumes.at(0).at(1) < neumes.at(1).at(1) {
-    if neumes.at(1).at(1) > neumes.at(2).at(1) {
-      continue
-    } else {
-      panic("incorrect sequence in torculus")
+      panic("incorrect syntax - single semicolon", anno)
     }
   } else {
-    panic("incorrect sequence in torculus")
+    if anno.len() > 4 {
+      panic("incorrect rhythm marking", anno)
+    } else {
+      if anno == "|" {
+        let type = "bar_quarter"
+      } else if anno == "||" {
+        let type = "bar_half"
+      } else if anno == "|||" {
+        let type = "bar_full"
+      } else if anno == "||||" {
+        let type = "bar_double"
+      } else {
+        panic("incorrect rhythm marking", anno)
+      }
+    }
   }
-  return pass
+  let proc_anno = ("rhythm", type)
+  return proc_anno
 }
 
-#let porr_check(neumes) = {
-  let pass = true
-  if neumes.at(0).at(1) > neumes.at(1).at(1) {
-    if neumes.at(1).at(1) < neumes.at(2).at(1) {
-      continue
+#let neume_parse(anno) = {
+  let char_index = 0
+  let type = "punctum"
+  let mods = ()
+  while char_index < anno.len() {
+    if char_index == 0 {
+      let val = int(anno.at(char_index))
+      char_index += 1
     } else {
-      panic("incorrect sequence in porrectus")
+      if anno.at(char_index) == "h" {
+        let type = "punctum_hollow"
+      } else if anno.at(char_index) == "r" {
+        let type = "rhombus"
+      } else if anno.at(char_index) == "f" {
+        let type = "flat"
+      } else if anno.at(char_index) == "n" {
+        let type = "natural"
+      } else if anno.at(char_index) == "d" {
+        mods.push("dot")
+      } else if anno.at(char_index) == "e" {
+        mods.push("episema_horiz")
+      } else if anno.at(char_index) == "E" {
+        mods.push("episema_vert")
+      } else if anno.at(char_index) == "v" {
+        mods.push("virga_right")
+      } else if anno.at(char_index) == "V" {
+        mods.push("virga_left")
+      } else if anno.at(char_index) == "\'" {
+        mods.push("accentus")
+      } else {
+        panic("unknown character in neume", anno)
+      }
     }
+    char_index += 1
+  }
+  let proc_anno = (type, val, mods)
+  return proc_anno
+}
+
+#let anno_parse(anno) = {
+  if anno.at(0) in digits {
+    let proc_anno = neume_parse(anno)
+  } else if anno.at(0) in group_chars {
+    let proc_anno = group_parse(anno)
+  } else if anno.at(0) in rhythm_chars {
+    let proc_anno = rhythm_parse(anno)
   } else {
-    panic("incorrect sequence in porrectue")
+    panic("syntax error: leading character incorrect", anno)
   }
-  if "dot" in neumes.at(0).at(2) {
-    panic("dot not allowed on first neume of porrectus")
-  } else if "dot" in neumes.at(1).at(2) {
-    panic("dot not allowen on first neume of porrectus")
+  return proc_anno
+}
+
+#let syll_parse(syll) = {
+  let text = ""
+  let char_index = 0
+  let text_break = false
+  while text_break = false {
+    let char = syll.at(char_index)
+    if char in text_chars {
+      let text = text + char
+      char_index += 1
+    } else {
+      let text_break = true
+      char_index += 1
+    }
   }
-  return pass
+  let annos = ()
+  while char_index < syll.len() {
+    let anno_break = false
+    let anno = ""
+    while anno_break == false {
+      if syll.at(char_index) == "(" {
+        if syll.at(char_index + 1) == "(" {
+          char_index += 1
+          continue
+        } else {
+          let anno = anno + syll.at(char_index)
+          char_index += 1
+        }
+      } else if syll.at(char_index) == ")" {
+        if syll.at(char_index - 1) == ")" {
+          char_index += 1
+          let anno_break = true
+          annos.push(anno)
+        }
+      } else {
+        let anno = anno + syll.at(char_index)
+        char_index += 1
+      }
+    }
+  }
+  let proc_syll = (text,)
+  for anno in annos {
+    let proc_anno = anno_parse(anno)
+    proc_syll.push(proc_anno)
+  }
+  return proc_syll
+}
+
+#let word_parse(no_text, word) = {
+  if no_text == false {
+    if word.at(0) == "(" {
+      panic("no text with annotation", word)
+    }
+  }
+  // checking that parentheses match
+  let open_count = 0
+  let close_count = 0
+  for char in word {
+    if char == "(" {
+      open_count += 1
+    } else if char == ")" {
+      close_count += 1
+    }
+  }
+  if open_count != close_count {
+    panic("mismatched parentheses", word)
+  } else if open_count == 0 {
+    panic("no annotation", word)
+  }
+  let sylls = ()
+  let char_index = 0
+  while char_index < word.len() {
+    let syll = ""
+    let syll_break = false
+    while syll_break == false {
+      syll = syll + word.at(char_index)
+      char_index += 1
+      if (char_index + 1) == word.len() {
+        syll_break = true
+        syll = syll + word.at(char_index)
+        char_index += 1
+      } else if word.at(char_index) == ")" and word.at(char_index + 1) in text_chars {
+        syll_break = true
+        syll = syll + word.at(char_index)
+        char_index += 1
+      }
+    }
+    sylls.push(syll)
+  }
+  let proc_sylls = ()
+  for syll in sylls {
+    let proc_syll = syll_parse(syll)
+    proc_sylls.push(proc_syll)
+  }
+  return proc_sylls
+}
+
+#let chant_parse(source) = {
+  let source_len = source.len()
+  if source.trim() == ""{
+    panic("Text field is empty")
+  }
+  let raw_words = ()
+  let proc_words = ()
+  let no_text = false
+  let word_break = false
+  let chant_break = false
+  let char_index = 0
+  if source.at(0) == "(" {
+    let no_text = true
+  }
+
+  while chant_break == false {
+    let word = ""
+    while word_break == false {
+      word = word + source.at(char_index)
+      char_index += 1
+      if (char_index + 1) == source.len() {
+        chant_break = true
+        word_break = true
+        word = word + source.at(char_index)
+      } else if source.at(char_index) == " " {
+        word_break = true
+        char_index += 1
+      }
+    }
+    raw_words.push(word)
+  }
+
+  for word in raw_words {
+    let proc_word = word_parse(no_text, word)
+    proc_words.push(proc_word)
+  }
 }
