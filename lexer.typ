@@ -7,20 +7,21 @@
 
 
 #let porr_check(neumes) = {
+  // pass is a dummy variable used to perform validity checks
   let pass = true
   if neumes.at(0).at(1) > neumes.at(1).at(1) {
     if neumes.at(1).at(1) < neumes.at(2).at(1) {
-      continue
+      pass = true
     } else {
-      panic("incorrect sequence in porrectus")
+      panic("incorrect sequence in porrectus", neumes)
     }
   } else {
-    panic("incorrect sequence in porrectue")
+    panic("incorrect sequence in porrectus", neumes)
   }
   if "dot" in neumes.at(0).at(2) {
-    panic("dot not allowed on first neume of porrectus")
+    panic("dot not allowed on first neume of porrectus", neumes)
   } else if "dot" in neumes.at(1).at(2) {
-    panic("dot not allowen on first neume of porrectus")
+    panic("dot not allowen on first neume of porrectus", neumes)
   }
   return pass
 }
@@ -31,10 +32,10 @@
     if neumes.at(1).at(1) > neumes.at(2).at(1) {
       pass = true
     } else {
-      panic("incorrect sequence in torculus")
+      panic("incorrect sequence in torculus", neumes)
     }
   } else {
-    panic("incorrect sequence in torculus")
+    panic("incorrect sequence in torculus", neumes)
   }
   return pass
 }
@@ -46,7 +47,7 @@
     if neumes.at(neume_index).at(1) < neumes.at(neume_index + 1).at(1) {
       neume_index += 1
     } else {
-      panic("ascending neumes in descending neume group")
+      panic("ascending neumes in descending neume group", neumes)
     }
   }
   return pass
@@ -59,7 +60,7 @@
     if neumes.at(neume_index).at(1) < neumes.at(neume_index + 1).at(1) {
       neume_index += 1
     } else {
-      panic("descending neumes in ascending group type")
+      panic("descending neumes in ascending group type", neumes)
     }
   }
   return pass
@@ -69,15 +70,15 @@
   let pass = true
   for neume in neumes {
     if neume.at(0) != "punctum" {
-      panic("only puncta allowed in joined groups")
+      panic("only puncta allowed in joined groups", neumes)
     }
     let mods = neume.at(2)
     if "virga_right" in mods {
-      panic("virgae not allowed in joined groups")
+      panic("virgae not allowed in joined groups", neumes)
     } else if "virga_left" in mods {
-      panic("virgae not allowed in joined groups")
+      panic("virgae not allowed in joined groups", neumes)
     } else {
-      continue
+      pass = true
     }
   }
 }
