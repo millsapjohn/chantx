@@ -29,7 +29,7 @@
   let pass = true
   if neumes.at(0).at(1) < neumes.at(1).at(1) {
     if neumes.at(1).at(1) > neumes.at(2).at(1) {
-      continue
+      pass = true
     } else {
       panic("incorrect sequence in torculus")
     }
@@ -55,7 +55,7 @@
 #let ascend_check(neumes) = {
   let pass = true
   let neume_index = 0
-  while neume_index < neumes.len() {
+  while neume_index < (neumes.len() - 1) {
     if neumes.at(neume_index).at(1) < neumes.at(neume_index + 1).at(1) {
       neume_index += 1
     } else {
@@ -71,7 +71,7 @@
     if neume.at(0) != "punctum" {
       panic("only puncta allowed in joined groups")
     }
-    let mods = neume.at(1)
+    let mods = neume.at(2)
     if "virga_right" in mods {
       panic("virgae not allowed in joined groups")
     } else if "virga_left" in mods {
@@ -82,6 +82,46 @@
   }
 }
 
+#let neume_parse(anno) = {
+  let char_index = 0
+  let type = "punctum"
+  let mods = ()
+  let val = 1
+  while char_index < anno.len() {
+    if char_index == 0 {
+      val = int(anno.at(char_index))
+      char_index += 1
+    } else {
+      if anno.at(char_index) == "h" {
+        type = "punctum_hollow"
+      } else if anno.at(char_index) == "r" {
+        type = "rhombus"
+      } else if anno.at(char_index) == "f" {
+        type = "flat"
+      } else if anno.at(char_index) == "n" {
+        type = "natural"
+      } else if anno.at(char_index) == "d" {
+        mods.push("dot")
+      } else if anno.at(char_index) == "e" {
+        mods.push("episema_horiz")
+      } else if anno.at(char_index) == "E" {
+        mods.push("episema_vert")
+      } else if anno.at(char_index) == "v" {
+        mods.push("virga_right")
+      } else if anno.at(char_index) == "V" {
+        mods.push("virga_left")
+      } else if anno.at(char_index) == "\'" {
+        mods.push("accentus")
+      } else {
+        panic("unknown character in neume", anno)
+      }
+    }
+    char_index += 1
+  }
+  let proc_anno = (type, val, mods)
+  return proc_anno
+}
+
 #let group_parse(anno) = {
   let raw_neumes = ()
   let char_index = 1
@@ -90,25 +130,32 @@
     let raw_neume = ""
     let val = "f"
     while neume_break == false {
-      if anno.at(char_index) == "{" {
+      if anno.at(char_index) in "([{" {
         char_index += 1
         continue
       } else if anno.at(char_index) in digits {
-        if val = "f" {
-          let val = anno.at(char_index)
-          let raw_neume = raw_neume + anno.at(char_index)
+        if val == "f" {
+          val = anno.at(char_index)
+          raw_neume = raw_neume + anno.at(char_index)
           char_index += 1
         } else {
-          let neume_break = true
+          neume_break = true
         }
       } else if anno.at(char_index) in deco_chars {
-        let raw_neume = raw_neume + anno.at(char_index)
+        raw_neume = raw_neume + anno.at(char_index)
         char_index += 1
       } else if anno.at(char_index) in neume_chars {
-        let raw_neume = raw_neume + anno.at(char_index)
+        raw_neume = raw_neume + anno.at(char_index)
         char_index += 1
-      } else if anno.at(char_index) == "}" {
-        let neume_break = true
+      } else if anno.at(char_index) in ")]}" {
+        if (char_index + 1) == anno.len() {
+          char_index += 1
+        }else if anno.at(char_index + 1) in ")]}" {
+          char_index += 2
+        } else {
+          char_index += 1
+        }
+        neume_break = true
       } else {
         panic("incorrect group notation", anno)
       }
@@ -117,68 +164,69 @@
   }
   let proc_neumes = ()
   for raw_neume in raw_neumes {
-    let proc_neume = neum_parse(raw_neume)
+    let proc_neume = neume_parse(raw_neume)
     proc_neumes.push(proc_neume)
   }
+  let type = "type"
   if anno.at(0) == "p" {
-    let type = "podatus"
+    type = "podatus"
     if proc_neumes.len() != 2 {
       panic("incorrect number of neumes in podatus", anno)
     }
     let pass = group_mods(proc_neumes)
     let pass = ascend_check(proc_neumes)
   } else if anno.at(0) == "c" {
-    let type = "clivis"
-    if proc_neumes.len() != 2 {
-      panic("incorrect number of neumes in clivis", anno)
-    }
-    let pass = group_mods(proc_neumes)
-    let pass = descend_check(proc_neumes)
+      type = "clivis"
+      if proc_neumes.len() != 2 {
+        panic("incorrect number of neumes in clivis", anno)
+      }
+      let pass = group_mods(proc_neumes)
+      let pass = descend_check(proc_neumes)
   } else if anno.at(0) == "t" {
-    let type = "torculus"
-    if proc_neumes.len() != 3 {
-      panic("incorrect number of neumes in torculus", anno)
-    }
-    let pass = group_mods(proc_neumes)
-    let pass = torc_check(proc_neumes)
+      type = "torculus"
+      if proc_neumes.len() != 3 {
+        panic("incorrect number of neumes in torculus", anno)
+      }
+      let pass = group_mods(proc_neumes)
+      let pass = torc_check(proc_neumes)
   } else if anno.at(0) == "o" {
-    let type = "porrectus"
-    if proc_neumes.len() != 3 {
-      panic("incorrect number of neumes in porrectus", anno)
-    }
-    let pass = group_mods(proc_neumes)
-    let pass = porr_check(proc_neumes)
+      type = "porrectus"
+      if proc_neumes.len() != 3 {
+        panic("incorrect number of neumes in porrectus", anno)
+      }
+      let pass = group_mods(proc_neumes)
+      let pass = porr_check(proc_neumes)
   } else if anno.at(0) == "s" {
-    let type = "scandicus"
-    if proc_neumes.len() != 3 {
-      panic("incorrect number of neumes in scandicus", anno)
-    }
-    let pass = group_mods(proc_neumes)
-    let pass = ascend_check(proc_neumes)
+      type = "scandicus"
+      if proc_neumes.len() != 3 {
+        panic("incorrect number of neumes in scandicus", anno)
+      }
+      let pass = group_mods(proc_neumes)
+      let pass = ascend_check(proc_neumes)
   } else if anno.at(0) == "l" {
-    let type = "salicus"
-    if proc_neumes.len() != 3 {
-      panic("incorrect number of neumes in salicus", anno)
-    }
-    let pass = group_mods(proc_neumes)
-    let pass = ascend_check(proc_neumes)
+      type = "salicus"
+      if proc_neumes.len() != 3 {
+        panic("incorrect number of neumes in salicus", anno)
+      }
+      let pass = group_mods(proc_neumes)
+      let pass = ascend_check(proc_neumes)
   } else if anno.at(0) == "q" {
-    let type = "quilisma"
-    if proc_neumes.len() != 3 {
-      panic("incorrect number of neumes in quilisma", anno)
-    }
-    let pass = group_mods(proc_neumes)
-    let pass = ascend_check(proc_neumes)
+      type = "quilisma"
+      if proc_neumes.len() != 3 {
+        panic("incorrect number of neumes in quilisma", anno)
+      }
+      let pass = group_mods(proc_neumes)
+      let pass = ascend_check(proc_neumes)
   } else if anno.at(0) == "(" {
-    let type = "tie_round"
+      type = "tie_round"
   } else if anno.at(0) == "{" {
-    if anno.at(1) == "{" {
-      let type = "tie_bracket_punctus"
-    } else {
-      let type = "tie_bracket"
-    }
+      if anno.at(1) == "{" {
+        type = "tie_bracket_punctus"
+      } else {
+        type = "tie_bracket"
+      }
   } else {
-    panic("incorrect group syntax", anno)
+      panic("incorrect group syntax", anno)
   }
   let proc_group = (type, proc_neumes)
   return proc_group
@@ -212,52 +260,14 @@
   return proc_anno
 }
 
-#let neume_parse(anno) = {
-  let char_index = 0
-  let type = "punctum"
-  let mods = ()
-  while char_index < anno.len() {
-    if char_index == 0 {
-      let val = int(anno.at(char_index))
-      char_index += 1
-    } else {
-      if anno.at(char_index) == "h" {
-        let type = "punctum_hollow"
-      } else if anno.at(char_index) == "r" {
-        let type = "rhombus"
-      } else if anno.at(char_index) == "f" {
-        let type = "flat"
-      } else if anno.at(char_index) == "n" {
-        let type = "natural"
-      } else if anno.at(char_index) == "d" {
-        mods.push("dot")
-      } else if anno.at(char_index) == "e" {
-        mods.push("episema_horiz")
-      } else if anno.at(char_index) == "E" {
-        mods.push("episema_vert")
-      } else if anno.at(char_index) == "v" {
-        mods.push("virga_right")
-      } else if anno.at(char_index) == "V" {
-        mods.push("virga_left")
-      } else if anno.at(char_index) == "\'" {
-        mods.push("accentus")
-      } else {
-        panic("unknown character in neume", anno)
-      }
-    }
-    char_index += 1
-  }
-  let proc_anno = (type, val, mods)
-  return proc_anno
-}
-
 #let anno_parse(anno) = {
+  let proc_anno = ()
   if anno.at(0) in digits {
-    let proc_anno = neume_parse(anno)
+    proc_anno = neume_parse(anno)
   } else if anno.at(0) in group_chars {
-    let proc_anno = group_parse(anno)
+    proc_anno = group_parse(anno)
   } else if anno.at(0) in rhythm_chars {
-    let proc_anno = rhythm_parse(anno)
+    proc_anno = rhythm_parse(anno)
   } else {
     panic("syntax error: leading character incorrect", anno)
   }
@@ -268,37 +278,39 @@
   let text = ""
   let char_index = 0
   let text_break = false
-  while text_break = false {
+  while char_index < syll.len() {
     let char = syll.at(char_index)
     if char in text_chars {
-      let text = text + char
+      text = text + char
       char_index += 1
     } else {
-      let text_break = true
-      char_index += 1
+        break
     }
   }
   let annos = ()
   while char_index < syll.len() {
     let anno_break = false
     let anno = ""
+    let open_count = 0
+    let close_count = 0
     while anno_break == false {
       if syll.at(char_index) == "(" {
-        if syll.at(char_index + 1) == "(" {
+        open_count += 1
+        if syll.at(char_index - 1) == "(" {
+          anno = anno + syll.at(char_index)
           char_index += 1
-          continue
         } else {
-          let anno = anno + syll.at(char_index)
           char_index += 1
         }
       } else if syll.at(char_index) == ")" {
-        if syll.at(char_index - 1) == ")" {
+        close_count += 1
+        if open_count > 0 and open_count == close_count {
+          anno_break = true
           char_index += 1
-          let anno_break = true
           annos.push(anno)
         }
       } else {
-        let anno = anno + syll.at(char_index)
+        anno = anno + syll.at(char_index)
         char_index += 1
       }
     }
@@ -396,4 +408,5 @@
     let proc_word = word_parse(no_text, word)
     proc_words.push(proc_word)
   }
+  return proc_words
 }
